@@ -14,6 +14,43 @@ document.addEventListener('DOMContentLoaded', () => {
     let isListening = false;
     let isAutoPlayEnabled = true; // Default to true as per request
 
+    // Load chat history from localStorage
+    function loadChatHistory() {
+        const savedHistory = localStorage.getItem('aura_chat_history');
+        if (savedHistory) {
+            try {
+                const messages = JSON.parse(savedHistory);
+                messages.forEach(msg => {
+                    addMessage(msg.text, msg.sender, msg.data, false); // false = don't save again
+                });
+                console.log(`Loaded ${messages.length} messages from history`);
+            } catch (e) {
+                console.error('Error loading chat history:', e);
+            }
+        }
+    }
+
+    // Save chat history to localStorage
+    function saveChatHistory() {
+        const messages = [];
+        const messageElements = chatContainer.querySelectorAll('.message');
+        messageElements.forEach(msgEl => {
+            const isUser = msgEl.classList.contains('user-message');
+            const content = msgEl.querySelector('.content');
+            if (content) {
+                messages.push({
+                    text: content.textContent || content.innerText,
+                    sender: isUser ? 'user' : 'bot',
+                    data: null // We'll store data separately if needed
+                });
+            }
+        });
+        localStorage.setItem('aura_chat_history', JSON.stringify(messages));
+    }
+
+    // Load history on page load
+    loadChatHistory();
+
     // Initialize Speech Recognition
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -97,7 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
     sendBtn.addEventListener('click', sendMessage);
 
     newChatBtn.addEventListener('click', () => {
+        // Clear session and chat history
         localStorage.removeItem('aura_session_id');
+        localStorage.removeItem('aura_chat_history');
         location.reload();
     });
 
@@ -132,54 +171,87 @@ document.addEventListener('DOMContentLoaded', () => {
         const shuffled = quickFacts.sort(() => 0.5 - Math.random());
         const selectedFacts = shuffled.slice(0, 3);
 
-        // Add close button and progress bar
-        let html = '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">';
-        html += '<div class="quick-facts-title">Did you know?</div>';
-        html += '<button onclick="document.getElementById(\'quick-facts-popup\').style.display=\'none\'" style="background:none; border:none; color:white; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>';
-        html += '</div>';
+        let currentIndex = 0;
 
-        html += '<ul style="padding-left: 20px; margin: 0;">';
-        selectedFacts.forEach(fact => {
-            html += `<li style="margin-bottom: 8px;">${fact}</li>`;
-        });
-        html += '</ul>';
+        // Function to display current fact
+        function displayFact(index) {
+            const fact = selectedFacts[index];
 
-        // Add progress bar
-        html += '<div class="progress-container" style="margin-top: 15px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden;">';
-        html += '<div class="progress-bar" style="height: 100%; background: var(--accent); width: 0%; transition: width 0.5s;"></div>';
-        html += '</div>';
+            let html = '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">';
+            html += '<div class="quick-facts-title">💡 Did you know?</div>';
+            html += '<button onclick="document.getElementById(\'quick-facts-popup\').style.display=\'none\'" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;"><i class="fa-solid fa-xmark"></i></button>';
+            html += '</div>';
 
-        message.innerHTML = html;
+            // Single fact card with slide animation
+            html += `<div class="fact-card" style="
+                background: rgba(255,255,255,0.05);
+                padding: 20px;
+                border-radius: 12px;
+                border: 1px solid rgba(255,255,255,0.1);
+                min-height: 80px;
+                display: flex;
+                align-items: center;
+                animation: slideIn 0.5s ease;
+            ">
+                <div style="font-size: 1rem; line-height: 1.6;">${fact}</div>
+            </div>`;
+
+            // Pagination dots
+            html += '<div style="display: flex; justify-content: center; gap: 8px; margin-top: 15px;">';
+            selectedFacts.forEach((_, i) => {
+                const active = i === index ? 'background: var(--accent);' : 'background: rgba(255,255,255,0.3);';
+                html += `<div style="width: 8px; height: 8px; border-radius: 50%; ${active} transition: all 0.3s;"></div>`;
+            });
+            html += '</div>';
+
+            // Progress bar
+            html += '<div class="progress-container" style="margin-top: 15px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden;">';
+            html += '<div class="progress-bar" style="height: 100%; background: var(--accent); width: 0%; transition: width 0.1s linear;"></div>';
+            html += '</div>';
+
+            message.innerHTML = html;
+        }
+
+        // Display first fact
+        displayFact(currentIndex);
         popup.style.display = 'block';
 
-        // Animate progress bar
+        // Auto-rotate through facts
+        const rotateInterval = setInterval(() => {
+            currentIndex = (currentIndex + 1) % selectedFacts.length;
+            displayFact(currentIndex);
+        }, 4000); // Change fact every 4 seconds
+
         // Animate progress bar
         const progressBar = message.querySelector('.progress-bar');
         let width = 0;
-        const interval = setInterval(() => {
+        const progressInterval = setInterval(() => {
             if (!progressBar) {
-                clearInterval(interval);
+                clearInterval(progressInterval);
                 return;
             }
-            if (width >= 90) {
-                clearInterval(interval);
+            if (width >= 100) {
+                width = 0; // Reset for next fact
             } else {
-                width += Math.random() * 10;
+                width += 2.5; // 100% in 4 seconds (2.5 * 40 = 100)
                 progressBar.style.width = width + '%';
             }
-        }, 500);
+        }, 100);
 
-        // Store interval to clear it later
-        popup.dataset.intervalId = interval;
+        // Store intervals to clear them later
+        popup.dataset.rotateIntervalId = rotateInterval;
+        popup.dataset.progressIntervalId = progressInterval;
     }
-
     function hideQuickFact() {
         const popup = document.getElementById('quick-facts-popup');
         if (popup) {
             popup.style.display = 'none';
-            if (popup.dataset.intervalId) {
-                clearInterval(popup.dataset.intervalId);
-                popup.dataset.intervalId = null;
+            // Clear both intervals
+            if (popup.dataset.rotateIntervalId) {
+                clearInterval(popup.dataset.rotateIntervalId);
+            }
+            if (popup.dataset.progressIntervalId) {
+                clearInterval(popup.dataset.progressIntervalId);
             }
         }
     }
@@ -249,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function addMessage(text, sender, structuredData = null) {
+    function addMessage(text, sender, structuredData = null, shouldSave = true) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}-message`;
 
@@ -304,6 +376,16 @@ document.addEventListener('DOMContentLoaded', () => {
             pdfExportBtn.style.cssText = 'font-size: 0.8rem; color: var(--text-secondary);';
             pdfExportBtn.onclick = () => exportAsPDF(text, structuredData);
 
+            // Edit Plan button (for account plans)
+            if (text.toLowerCase().includes('account plan') || text.toLowerCase().includes('executive summary')) {
+                const editBtn = document.createElement('button');
+                editBtn.className = 'icon-btn';
+                editBtn.innerHTML = '<i class="fa-solid fa-edit"></i> Edit Plan';
+                editBtn.style.cssText = 'font-size: 0.8rem; color: var(--text-secondary);';
+                editBtn.onclick = () => enableInlineEditing(contentDiv, editBtn);
+                actionsDiv.appendChild(editBtn);
+            }
+
             actionsDiv.appendChild(speakBtn);
             actionsDiv.appendChild(copyBtn);
             actionsDiv.appendChild(exportBtn);
@@ -311,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
             contentDiv.appendChild(actionsDiv);
 
             // Autoplay audio for bot responses if enabled
-            if (isAutoPlayEnabled) {
+            if (isAutoPlayEnabled && shouldSave) { // Only autoplay for new messages
                 setTimeout(() => {
                     speakText(text, speakBtn, true);
                 }, 500);
@@ -326,6 +408,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         chatContainer.appendChild(messageDiv);
         chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        // Save chat history after adding message
+        if (shouldSave) {
+            saveChatHistory();
+        }
     }
 
     // PDF export function
@@ -538,6 +625,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function generateAdvancedCharts(data) {
         const insightsPanel = document.getElementById('insights-panel');
+
+        // 0. Conflicts Warning (Highest Priority)
+        if (data.conflicts && data.conflicts.length > 0) {
+            const conflictCard = document.createElement('div');
+            conflictCard.className = 'insight-card';
+            conflictCard.style.cssText = 'background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(231, 76, 60, 0.1)); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(231, 76, 60, 0.5); backdrop-filter: blur(10px);';
+
+            let html = `<div style="font-weight: 600; margin-bottom: 10px; color: #e74c3c; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-triangle-exclamation"></i> DATA CONFLICTS DETECTED
+            </div>`;
+
+            data.conflicts.forEach(conflict => {
+                html += `<div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                    <div style="font-size: 0.85rem; margin-bottom: 5px;">${conflict.message}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                        Values found: ${conflict.values.join(', ')} | Variance: ${conflict.variance}%
+                    </div>
+                </div>`;
+            });
+
+            conflictCard.innerHTML = html;
+            insightsPanel.prepend(conflictCard);
+        }
 
         // 1. News Flash (Top Priority)
         if (data.recent_news && data.recent_news.length > 0) {
@@ -862,6 +972,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Determine chart type based on data
         // If multiple columns, maybe bar chart. If time-series, line chart.
         // For simplicity, default to bar chart for now.
+        // For simplicity, default to bar chart for now.
+        if (!table.rows || !Array.isArray(table.rows)) {
+            console.warn('Table rows missing or invalid:', table);
+            return;
+        }
         const labels = table.rows.map(row => row[0]); // First column as labels
         const datasets = [];
 
@@ -931,4 +1046,55 @@ document.addEventListener('DOMContentLoaded', () => {
             createMetricsChart(metrics);
         }
     }
+
+    // Inline Editing for Account Plans
+    function enableInlineEditing(contentDiv, editBtn) {
+        const isEditing = contentDiv.contentEditable === 'true';
+
+        if (isEditing) {
+            // Save changes
+            contentDiv.contentEditable = 'false';
+            contentDiv.style.border = 'none';
+            contentDiv.style.padding = '0';
+            editBtn.innerHTML = '<i class="fa-solid fa-edit"></i> Edit Plan';
+            editBtn.style.color = 'var(--text-secondary)';
+
+            // Show save confirmation
+            const saveMsg = document.createElement('div');
+            saveMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: rgba(88, 214, 141, 0.9); color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000; animation: fadeIn 0.3s ease;';
+            saveMsg.innerHTML = '<i class="fa-solid fa-check"></i> Changes saved!';
+            document.body.appendChild(saveMsg);
+
+            setTimeout(() => {
+                saveMsg.style.opacity = '0';
+                saveMsg.style.transition = 'opacity 0.3s';
+                setTimeout(() => saveMsg.remove(), 300);
+            }, 2000);
+
+        } else {
+            // Enable editing
+            contentDiv.contentEditable = 'true';
+            contentDiv.style.border = '2px dashed var(--accent)';
+            contentDiv.style.padding = '10px';
+            contentDiv.style.borderRadius = '8px';
+            editBtn.innerHTML = '<i class="fa-solid fa-save"></i> Save Changes';
+            editBtn.style.color = '#58d68d';
+
+            // Focus on the content
+            contentDiv.focus();
+
+            // Show editing hint
+            const hint = document.createElement('div');
+            hint.style.cssText = 'position: fixed; top: 20px; right: 20px; background: rgba(108, 92, 231, 0.9); color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000; animation: fadeIn 0.3s ease;';
+            hint.innerHTML = '<i class="fa-solid fa-info-circle"></i> Click anywhere in the text to edit. Click "Save Changes" when done.';
+            document.body.appendChild(hint);
+
+            setTimeout(() => {
+                hint.style.opacity = '0';
+                hint.style.transition = 'opacity 0.3s';
+                setTimeout(() => hint.remove(), 300);
+            }, 4000);
+        }
+    }
+
 });
