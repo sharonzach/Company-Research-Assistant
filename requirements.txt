@@ -5,3 +5,5 @@ tavily-python
 jinja2
 python-multipart
 requests
+beautifulsoup4
+lxml
