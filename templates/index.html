@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura | Intelligent Research Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- PDF Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar for Account Plan / Context -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-atom fa-spin-pulse" style="color: var(--accent);"></i>
+                    <span>AURA</span>
+                </div>
+                <button id="new-chat-btn" class="icon-btn" title="New Research"><i
+                        class="fa-solid fa-plus"></i></button>
+            </div>
+
+            <div class="sidebar-content">
+                <div class="section-title">LIVE INSIGHTS</div>
+                <div id="insights-panel" class="insights-panel">
+                    <div class="empty-state">
+                        <i class="fa-regular fa-lightbulb"></i>
+                        <p>Research insights and charts will appear here as you chat.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="dot online"></span>
+                    <span>System Operational</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-area">
+            <header class="chat-header">
+                <div class="header-info">
+                    <h1>Company Research Assistant</h1>
+                    <p>Powered by Gemini & Tavily</p>
+                </div>
+                <div class="header-actions">
+                    <button id="audio-toggle-btn" class="icon-btn" title="Toggle Auto-Speech"><i
+                            class="fa-solid fa-volume-high"></i></button>
+                    <button class="icon-btn"><i class="fa-solid fa-gear"></i></button>
+                </div>
+            </header>
+
+            <div id="chat-container" class="chat-container">
+                <div class="message system-message">
+                    <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+                    <div class="content">
+                        <p>Hello! I'm Aura. I can help you research companies, analyze markets, and generate detailed
+                            account plans.</p>
+                        <p>Try asking: <em>"Research Nvidia's recent strategic shifts"</em> or <em>"Create an account
+                                plan for Tesla."</em></p>
+                    </div>
+                </div>
+                <div id="suggestions-container" class="suggestions-container">
+                    <div class="suggestion-chip"
+                        data-query="Research Tesla's financial performance and market position">
+                        <i class="fa-solid fa-chart-line"></i> Tesla Financials
+                    </div>
+                    <div class="suggestion-chip" data-query="Microsoft AI strategy and main competitors">
+                        <i class="fa-solid fa-brain"></i> Microsoft AI
+                    </div>
+                    <div class="suggestion-chip" data-query="Apple market share and revenue growth">
+                        <i class="fa-solid fa-apple-whole"></i> Apple Growth
+                    </div>
+                    <div class="suggestion-chip" data-query="Nvidia revenue trends and earnings">
+                        <i class="fa-solid fa-microchip"></i> Nvidia Revenue
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area Fixed at Bottom -->
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <button id="voice-btn" class="input-action-btn"><i class="fa-solid fa-microphone"></i></button>
+                    <textarea id="user-input" placeholder="Ask me anything about a company..." rows="1"></textarea>
+                    <button id="send-btn" class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+                <div class="input-tip">
+                    <i class="fa-solid fa-circle-info"></i> Tip: Click suggestions above or ask anything about a company
+                </div>
+            </div>
+        </main>
+
+        <!-- Quick Facts Popup (Centered Card) -->
+        <div id="quick-facts-popup" class="quick-facts-popup insight-card" style="display: none;">
+            <div class="quick-facts-content">
+                <div class="quick-facts-icon">
+                    <i class="fa-solid fa-lightbulb"></i>
+                </div>
+                <div class="quick-facts-text">
+                    <div class="quick-facts-title">Did you know?</div>
+                    <div id="quick-facts-message" class="quick-facts-message"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/powerbi-styles.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+
+</html>
