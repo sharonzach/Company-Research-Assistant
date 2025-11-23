@@ -2,7 +2,7 @@
 
 > **An intelligent conversational AI agent that researches companies, synthesizes information from multiple sources, and generates comprehensive account plans with stunning visualizations.**
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.8+-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 
@@ -60,10 +60,45 @@
 - **Audio Toggle**: Enable/disable auto-play from the header
 
 ### 💡 User Experience
-- **Quick Facts Popup**: Displays interesting facts while processing requests
-- **Suggestion Chips**: Quick-start queries for common research tasks
-- **Responsive Design**: Works seamlessly on desktop and tablet
-- **Dark Theme**: Eye-friendly neon-accented dark mode
+- **Quick Facts Carousel**: Displays a single fact card that slides automatically, with pagination dots and a progress bar.
+- **Suggestion Chips**: Quick-start queries for common research tasks.
+- **Responsive Design**: Works seamlessly on desktop and tablet.
+- **Dark Theme**: Eye‑friendly neon‑accented dark mode.
+- **Persistent Chat History**: Conversations saved and restored across sessions.
+
+### 🆕 Advanced Features (v2.0)
+
+#### 📝 Inline Editing for Account Plans
+- **Edit Button**: Appears automatically on account plan messages
+- **Click to Edit**: Modify sections directly in the chat interface
+- **Visual Feedback**: Dashed border indicates editable content
+- **Save Changes**: One-click save with confirmation notification
+- **No Re-generation**: Quick modifications without starting over
+
+#### ⚠️ Conflict Detection System
+- **Automatic Detection**: Identifies conflicting numeric values (>20% variance)
+- **Revenue & Market Cap**: Checks consistency across sources
+- **Warning Display**: Red alert card shows conflicts with details
+- **Variance Calculation**: Shows percentage difference between values
+- **Investigation Prompt**: Asks if you want to dig deeper
+
+#### 🔗 Enhanced Source Ranking
+- **Top 3 Sources**: Displays most trustworthy sources
+- **Clickable Links**: All URLs are clickable for verification
+- **Domain Extraction**: Shows clean, readable domain names
+- **Trust Indicators**: Visual icons for source reliability
+
+#### 🌐 Web Scraping Module
+- **Automatic Scraping**: Finds and scrapes official company websites
+- **Content Extraction**: Pulls title, meta description, and main content
+- **Data Integration**: Merges scraped data with API results
+- **Enhanced Context**: Provides richer information to the AI model
+
+#### 💾 Persistent Chat History
+- **Auto-Save**: Every message saved to browser localStorage
+- **Auto-Load**: Previous conversations restored on page refresh
+- **Session Continuity**: Seamless conversation across browser sessions
+- **Clear History**: "New Chat" button clears all saved data
 
 ---
 
@@ -74,6 +109,8 @@
 - **FastAPI** - High-performance web framework
 - **Google Generative AI (Gemini 2.0 Flash)** - Advanced language model
 - **Tavily API** - Real-time web search and research
+- **BeautifulSoup4** - HTML/XML parsing for web scraping
+- **lxml** - Fast XML and HTML parser
 
 ### Frontend
 - **HTML5 / CSS3 / JavaScript (ES6+)**
@@ -101,7 +138,7 @@
 ### Step 1: Clone the Repository
 ```bash
 git clone <repository-url>
-cd "repo"
+cd "EIGHTFOLD AI"
 ```
 
 ### Step 2: Install Dependencies
@@ -276,4 +313,3 @@ For questions, suggestions, or support, please open an issue in the repository.
 ---
 
 **Built with ❤️ for intelligent business research**
-
