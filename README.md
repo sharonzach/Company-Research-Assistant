@@ -101,7 +101,7 @@
 ### Step 1: Clone the Repository
 ```bash
 git clone <repository-url>
-cd "EIGHTFOLD AI"
+cd "repo"
 ```
 
 ### Step 2: Install Dependencies
@@ -276,3 +276,4 @@ For questions, suggestions, or support, please open an issue in the repository.
 ---
 
 **Built with ❤️ for intelligent business research**
+
