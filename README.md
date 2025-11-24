@@ -49,8 +49,6 @@
 
 ### 📊 Visual Analytics
 - **Dynamic Charts**: Bar charts for metrics, doughnut charts for sentiment, line charts for trends
-- **Trust Score Badge**: Displays confidence percentage and reliability scores
-- **Source Ranking**: Shows top 3 most trustworthy sources with clickable links
 - **News Flash Cards**: Highlights recent achievements and announcements
 
 ### 🎙️ Voice & Audio
@@ -82,11 +80,7 @@
 - **Variance Calculation**: Shows percentage difference between values
 - **Investigation Prompt**: Asks if you want to dig deeper
 
-#### 🔗 Enhanced Source Ranking
-- **Top 3 Sources**: Displays most trustworthy sources
-- **Clickable Links**: All URLs are clickable for verification
-- **Domain Extraction**: Shows clean, readable domain names
-- **Trust Indicators**: Visual icons for source reliability
+
 
 #### 🌐 Web Scraping Module
 - **Automatic Scraping**: Finds and scrapes official company websites
@@ -313,4 +307,5 @@ For questions, suggestions, or support, please open an issue in the repository.
 ---
 
 **Built with ❤️ for intelligent business research**
+
 
